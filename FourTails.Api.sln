@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourTails.Api.Test", "tests\FourTails.Api.Test.csproj", "{36C84BDF-A749-471C-926B-9123FD99D7E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D4A87D0D-DA65-4215-842B-10A9BD780A9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourTails.Core", "src\FourTails.Core\FourTails.Core.csproj", "{047348F6-C9B8-4AE3-839D-485CE9951935}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourTails.DataAccess", "src\FourTails.DataAccess\FourTails.DataAccess.csproj", "{D3231311-B7E6-49F3-A423-A0D8803A56B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourTails.Services", "src\FourTails.Services\FourTails.Services.csproj", "{3D52CC5E-D235-429A-8D64-217D0BFDFED1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourTails.Api", "src\FourTails.Api\FourTails.Api.csproj", "{D5D45722-2314-4ABC-8DA3-F94CC0F94B8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{36C84BDF-A749-471C-926B-9123FD99D7E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36C84BDF-A749-471C-926B-9123FD99D7E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36C84BDF-A749-471C-926B-9123FD99D7E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36C84BDF-A749-471C-926B-9123FD99D7E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{047348F6-C9B8-4AE3-839D-485CE9951935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{047348F6-C9B8-4AE3-839D-485CE9951935}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{047348F6-C9B8-4AE3-839D-485CE9951935}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{047348F6-C9B8-4AE3-839D-485CE9951935}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3231311-B7E6-49F3-A423-A0D8803A56B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3231311-B7E6-49F3-A423-A0D8803A56B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3231311-B7E6-49F3-A423-A0D8803A56B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3231311-B7E6-49F3-A423-A0D8803A56B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D52CC5E-D235-429A-8D64-217D0BFDFED1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D52CC5E-D235-429A-8D64-217D0BFDFED1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D52CC5E-D235-429A-8D64-217D0BFDFED1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D52CC5E-D235-429A-8D64-217D0BFDFED1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5D45722-2314-4ABC-8DA3-F94CC0F94B8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D45722-2314-4ABC-8DA3-F94CC0F94B8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D45722-2314-4ABC-8DA3-F94CC0F94B8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D45722-2314-4ABC-8DA3-F94CC0F94B8E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{047348F6-C9B8-4AE3-839D-485CE9951935} = {D4A87D0D-DA65-4215-842B-10A9BD780A9A}
+		{D3231311-B7E6-49F3-A423-A0D8803A56B8} = {D4A87D0D-DA65-4215-842B-10A9BD780A9A}
+		{3D52CC5E-D235-429A-8D64-217D0BFDFED1} = {D4A87D0D-DA65-4215-842B-10A9BD780A9A}
+		{D5D45722-2314-4ABC-8DA3-F94CC0F94B8E} = {D4A87D0D-DA65-4215-842B-10A9BD780A9A}
+	EndGlobalSection
+EndGlobal
