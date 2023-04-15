@@ -9,9 +9,11 @@ public class Pet {
     public string Moniker {get; set;}
     public GenderEnum Gender {get; set;}
     public User PetOwner {get; set;}
-    public int PetOwnerId {get; set;}
+    public string PetOwnerId {get; set;}
 
-    public Pet(int id, int age, string moniker, GenderEnum gender, User petOwner, int petOwnerId)
+    public Pet(){}
+
+    public Pet(int id, int age, string moniker, GenderEnum gender, User petOwner, string petOwnerId)
     {
         Id = id;
         Age = age;

@@ -23,9 +23,9 @@ public class UserRepository : ICrudRepository<User>
         return Task.FromResult(_context.Set<User>().Remove(user).Entity);
     }
 
-    public async Task<User> ReadById(int id)
+    public async Task<User> ReadById(string userId)
     {
-       return await _context.Set<User>().AsNoTracking().Where(x => x.Id == id).FirstAsync();
+       return await _context.Set<User>().AsNoTracking().Where(x => x.Id == userId).FirstAsync();
     }
 
     public async Task<IEnumerable<User>> ReadAll()

@@ -5,11 +5,12 @@ public class Message
     public int Id {get; set;}
     public string IncomingMessage {get; init;}
     public User MessageAuthor {get; set;}
-    public int MessageAuthorId {get; set;}
+    public string MessageAuthorId {get; set;}
     public string OutgoingMessage {get; init;}
 
+    public Message(){}
 
-    public Message (int id, string incomingMessage, string outgoingMessage, User messageAuthor, int messageAuthorId) 
+    public Message (int id, string incomingMessage, string outgoingMessage, User messageAuthor, string messageAuthorId) 
     {
         Id = id;
         IncomingMessage = incomingMessage ?? throw new ArgumentNullException(nameof(incomingMessage));

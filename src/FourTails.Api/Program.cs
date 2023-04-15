@@ -1,11 +1,29 @@
+using FourTails.Api.Configurations;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// add logging providers
+builder.Logging.ClearProviders();
+var logger = new LoggerConfiguration()
+    .ReadFrom
+    .Configuration(builder.Configuration)
+    .CreateLogger();
 
+builder.Logging.AddSerilog(logger);
+
+// Add services to the container.
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add JWT configuration
+builder.Services.AddJwtConfiguration(builder.Configuration);
+
+// database configuration
+builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 var app = builder.Build();
 
@@ -21,5 +39,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// database migrations
+app.UseDBMigrationConfiguration();
 
 app.Run();

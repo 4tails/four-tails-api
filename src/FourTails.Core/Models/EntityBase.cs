@@ -1,24 +1,25 @@
+using Microsoft.AspNetCore.Identity;
 namespace FourTails.Core.DomainModels;
 
-public abstract class EntityBase
+public class EntityBase : IdentityUser
 {
-    public string CreatedBy {get; set;}
-    public DateTime CreatedOn {get; set;}
     public bool IsActive {get; set;}
-    public string? UpdatedBy {get; set;}
+    public DateTime CreatedOn {get; set;}
     public DateTime? UpdatedOn {get; set;}
+    public string? CreatedBy {get; set;}
+    public string? UpdatedBy {get; set;}
 
-    public EntityBase(User user)
+    public void Timestamp(User user)
     {
-        CreatedOn = DateTime.UtcNow;
         CreatedBy = user.CreatedBy ?? throw new ArgumentNullException(nameof(user.CreatedBy));
+        CreatedOn = DateTime.UtcNow;
         IsActive = true;
     }
 
     public void UpdatedByUser(User user)
     {
+        IsActive = user.IsActive;
         UpdatedBy = user.UpdatedBy;
         UpdatedOn = DateTime.UtcNow;
-        IsActive = user.IsActive;
     }
 }

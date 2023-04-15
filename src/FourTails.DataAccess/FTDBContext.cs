@@ -1,31 +1,38 @@
-using Microsoft.EntityFrameworkCore;
 using FourTails.Core.DomainModels;
 using FourTails.DataAccess.EntityConfiguration;
+using FourTails.DataAccess.SeedData;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace FourTails.DataAccess;
 
-public class FTDBContext : DbContext
+public class FTDBContext : IdentityDbContext<User>
 {
-    private readonly DbContextOptions<FTDBContext> _context;
+    public FTDBContext() : base() {}
+    public FTDBContext(DbContextOptions<FTDBContext> options) :base(options){}
 
-    public FTDBContext(DbContextOptions<FTDBContext> context)
-    { 
-        _context = context;
-    }
-
-    public DbSet<User> Users { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Pet> Pets { get; set; }
+    public DbSet<User> IdentityUsers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // set properties
-        modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
+        base.OnModelCreating(modelBuilder);
+        SetRelations(modelBuilder);
+        SetTableProperties(modelBuilder);
+    }
+
+    public static void SetTableProperties(ModelBuilder modelBuilder)
+    {
         modelBuilder.ApplyConfiguration(new MessageEntityConfiguration());
         modelBuilder.ApplyConfiguration(new PetEntityConfiguration());
-        
-        // set relations
-        modelBuilder
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
+    }
+
+    public static void SetRelations(ModelBuilder modelBuilder)
+    {
+         modelBuilder
         .Entity<Message>()
         .HasOne<User>(u => u.MessageAuthor)
         .WithMany(m => m.Messages)
@@ -36,5 +43,10 @@ public class FTDBContext : DbContext
         .HasOne<User>(u => u.PetOwner)
         .WithMany(p => p.Pets)
         .HasForeignKey(u => u.PetOwnerId);
+    }
+
+    public static void SeedData(ModelBuilder modelBuilder)
+    {
+        modelBuilder.AddRoles();
     }
 }
