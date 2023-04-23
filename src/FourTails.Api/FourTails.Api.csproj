@@ -26,6 +26,7 @@
     <ProjectReference Include="../FourTails.Core/FourTails.Core.csproj" />
     <ProjectReference Include="../FourTails.DataAccess/FourTails.DataAccess.csproj" />
     <ProjectReference Include="../FourTails.Services/FourTails.Services.csproj" />
+    <ProjectReference Include="../FourTails.DTOs/FourTails.DTOs.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="./Logs/**" />

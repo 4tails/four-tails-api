@@ -1,4 +1,4 @@
-namespace FourTails.DTOs;
+namespace FourTails.DTOs.PayLoad;
 
 public record class Message
 (

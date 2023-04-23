@@ -10,7 +10,7 @@ public static class DBConfiguration
 {
     public static void AddDatabaseConfiguration(this IServiceCollection service, IConfiguration configuration)
     {
-        service.AddDbContext<FTDBContext>(options => // add separate context class
+        service.AddDbContext<FTDBContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), builder =>
             {

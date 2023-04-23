@@ -1,6 +1,5 @@
 using FourTails.Core.DomainModels;
 using FourTails.DataAccess.EntityConfiguration;
-using FourTails.DataAccess.SeedData;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +25,6 @@ public class FTDBContext : IdentityDbContext<User>
     {
         modelBuilder.ApplyConfiguration(new MessageEntityConfiguration());
         modelBuilder.ApplyConfiguration(new PetEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
     }
 
@@ -43,10 +41,5 @@ public class FTDBContext : IdentityDbContext<User>
         .HasOne<User>(u => u.PetOwner)
         .WithMany(p => p.Pets)
         .HasForeignKey(u => u.PetOwnerId);
-    }
-
-    public static void SeedData(ModelBuilder modelBuilder)
-    {
-        modelBuilder.AddRoles();
     }
 }

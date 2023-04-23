@@ -18,7 +18,6 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.LastName).IsRequired().HasMaxLength(50);
         builder.Property(x => x.UpdatedBy).HasDefaultValue(null);
         builder.Property(x => x.UpdatedOn).HasDefaultValue(null);
-        builder.Property(x => x.Role).IsRequired();
 
         // entity
         builder.ToTable("Users");

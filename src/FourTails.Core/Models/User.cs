@@ -4,10 +4,9 @@ namespace FourTails.Core.DomainModels;
 
 public class User : EntityBase
 {
-    public ICollection<Message> Messages {get; init;}
-    public ICollection<Pet> Pets {get; init;}
+    public ICollection<Message>? Messages {get; init;}
+    public ICollection<Pet>? Pets {get; init;}
     public int Age {get; set;}
-    public RoleEnum Role {get; set;}
     public string Address {get; set;}
     public string FirstName {get; set;}
     public string LastName {get; set;}
@@ -23,6 +22,5 @@ public class User : EntityBase
         LastName = lastName?? throw new ArgumentNullException(nameof(lastName));
         Messages = new List<Message>();
         Pets = new List<Pet>();
-        Role = role;
     }
 }

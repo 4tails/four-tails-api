@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FourTails.Api.Migrations
 {
     [DbContext(typeof(FTDBContext))]
-    [Migration("20230413123345_Initial")]
+    [Migration("20230417064734_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -85,21 +85,6 @@ namespace FourTails.Api.Migrations
                     b.ToTable("Pets", (string)null);
                 });
 
-            modelBuilder.Entity("FourTails.Core.DomainModels.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles", (string)null);
-                });
-
             modelBuilder.Entity("FourTails.Core.DomainModels.User", b =>
                 {
                     b.Property<string>("Id")
@@ -170,9 +155,6 @@ namespace FourTails.Api.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
