@@ -20,7 +20,11 @@ public class UserRepository : ICrudRepository<User>
 
     public Task Delete(User user)
     {
-        return Task.FromResult(_context.Set<User>().Remove(user).Entity);
+        _context.Set<User>().Remove(user);
+        _context.Entry(user).State = EntityState.Deleted;
+        _context.SaveChangesAsync();
+
+        return Task.CompletedTask;
     }
 
     public async Task<User> ReadById(string userId)
@@ -30,14 +34,15 @@ public class UserRepository : ICrudRepository<User>
 
     public async Task<IEnumerable<User>> ReadAll()
     {
-        return await _context.Set<User>().AsNoTracking().Where(x => x.IsActive).ToListAsync();
+        return await _context.Set<User>().AsNoTracking().ToListAsync();
     }
 
     public Task Update(User user)
     {
-        return Task.FromResult(() => {
-            _context.Set<User>().Attach(user);
-            _context.Entry(user).State = EntityState.Modified;
-        });
+        _context.Set<User>().Attach(user);
+        _context.Entry(user).State = EntityState.Modified;
+        _context.SaveChangesAsync();
+
+        return Task.CompletedTask;
     }
 }

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace FourTails.DTOs.PayLoad;
+namespace FourTails.DTOs.Payload.Auth;
 
 public record class AuthResponseDTO
 (

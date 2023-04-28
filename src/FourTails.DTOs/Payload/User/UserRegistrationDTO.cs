@@ -1,4 +1,4 @@
-namespace FourTails.DTOs.Payload;
+namespace FourTails.DTOs.Payload.User;
 
 public record class UserRegistrationDTO  
 (

@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace FourTails.Services;
+namespace FourTails.Services.Container;
 
 public class TokenService
 {

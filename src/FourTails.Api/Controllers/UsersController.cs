@@ -1,11 +1,12 @@
 using FourTails.Core.DomainModels;
 using FourTails.DataAccess;
-using FourTails.DTOs.Payload;
-using FourTails.DTOs.PayLoad;
-using FourTails.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using FourTails.DTOs.Payload.User;
+using FourTails.DTOs.Payload.Auth;
+using FourTails.Services.Container;
+using AutoMapper;
 
 namespace FourTails.Api.Controllers;
 
@@ -15,33 +16,80 @@ public class UsersController : ControllerBase
 {
     private readonly FTDBContext _context;
     private readonly ILogger _logger;
+    private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
     private readonly TokenService _tokenService;
+    private readonly IUserService _userService;
 
     public UsersController(
         FTDBContext context, 
-        ILogger<UsersController> logger, 
+        ILogger<UsersController> logger,
+        IMapper mapper,
+        IUserService userService,
         UserManager<User> userManager,
         TokenService tokenService)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
-         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-       _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+        _userService = userService ?? throw new ArgumentException(nameof(userService));
     }
 
-    [HttpGet("GetAll")]
-    [Authorize]
-    public ActionResult GetAllUsers()
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [HttpGet("GetAllUsers")]
+    public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
     {
         if (!ModelState.IsValid) 
         {
             BadRequest(ModelState);
         }
 
+        var users = await _userService.ReadAllUsers();
+
         _logger.LogInformation("executing GetAllUsers()");
 
-        return Ok();
+        return Ok(users);
+    }
+
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [HttpPut("UpdateUserDetails")]
+    public async Task<ActionResult> UpdateUserDetails([FromForm] UserUpdateDetailsDTO userUpdateDetailsDTO)
+    {
+        try 
+        {
+            var id = userUpdateDetailsDTO.Id;
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest("Invalid user id.");
+            }
+
+            var user = await _userService.ReadById(id);
+
+            if (!user.IsActive)
+            {
+                return NotFound("User is inactive.");
+            }
+
+            if (user == null)
+            {
+                return NotFound("User does not exist.");
+            }
+
+            var updatedUser = _userService.Update(user, userUpdateDetailsDTO);
+
+            var userMap = _mapper.Map<User, UserUpdateDetailsDTO>(updatedUser);
+
+            return Ok(userMap);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPost]
@@ -109,6 +157,7 @@ public class UsersController : ControllerBase
         }
 
         var userInDb = _context.Users.FirstOrDefault(x => x.Email == request.Email);
+
         if (userInDb is null)
             return Unauthorized();
 
@@ -122,5 +171,39 @@ public class UsersController : ControllerBase
             Email: userInDb.Email,
             Token: accessToken
         ));
+    }
+
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [HttpDelete("DeleteUser/{id}")]
+    public async Task<ActionResult> DeleteUser(string id)
+    {
+        try 
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest("Invalid user id.");
+            }
+
+            var user = await _userService.ReadById(id);
+
+            if (!user.IsActive)
+            {
+                return NotFound("User is inactive.");
+            }
+
+            if (user == null)
+            {
+                return NotFound("User does not exist.");
+            }
+
+            await _userService.DeleteUser(user);
+
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            return BadRequest(e.Message);
+        }
     }
 }

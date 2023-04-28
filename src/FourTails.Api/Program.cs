@@ -1,5 +1,8 @@
 using FourTails.Api.Configurations;
-using FourTails.Services;
+using FourTails.Core.DomainModels;
+using FourTails.Core.Repositories;
+using FourTails.DataAccess.Repositories;
+using FourTails.Services.Container;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -57,7 +60,12 @@ builder.Services.AddJwtConfiguration(builder.Configuration);
 
 // database configuration
 builder.Services.AddDatabaseConfiguration(builder.Configuration);
+builder.Services.AddScoped<ICrudRepository<User>, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<TokenService, TokenService>();
+
+// automapper configuration
+builder.Services.AddMapConfiguration();
 
 var app = builder.Build();
 
