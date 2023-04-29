@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="../FourTails.Core/FourTails.Core.csproj" />
     <ProjectReference Include="../FourTails.DTOs/FourTails.DTOs.csproj" />
+    <ProjectReference Include="../FourTails.DataAccess/FourTails.DataAccess.csproj" />
   </ItemGroup>
   
   <ItemGroup>

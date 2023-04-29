@@ -1,4 +1,6 @@
 using FourTails.Core.DomainModels;
+using FourTails.DataAccess;
+using FourTails.DTOs.Payload.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
@@ -10,26 +12,54 @@ namespace FourTails.Services.Container;
 
 public class TokenService
 {
+    private readonly FTDBContext _context;
     private readonly int TokenExpirationMinutes = 30;
     private readonly IConfiguration _configuration;
 
-    public TokenService(IConfiguration configuration)
+    public TokenService() {}
+
+    public TokenService(IConfiguration configuration, FTDBContext context)
     {
-        _configuration = configuration;
+        
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public string CreateToken(User user)
+    public Dictionary<string, AuthResponseDTO>? CreateToken(AuthRequestDTO request)
     {
+        var userInDb = _context.Users.FirstOrDefault(x => x.Email == request.Email);
+
+        if (userInDb is null)
+        {
+            return null;
+        }
+
         var expiration = DateTime.UtcNow.AddMinutes(TokenExpirationMinutes);
         var token = CreateJwtToken
         (
-            CreateClaims(user),
+            CreateClaims(userInDb),
             CreateSigningCredentials(),
             expiration
         );
+
+        _context.SaveChangesAsync();
+
         var tokenHandler = new JwtSecurityTokenHandler();
-        
-        return tokenHandler.WriteToken(token);
+        var accessToken = tokenHandler.WriteToken(token);
+
+        var response = new AuthResponseDTO
+        (
+            UserName: userInDb.UserName,
+            Email: userInDb.Email,
+            Token: accessToken
+        );
+
+        var userAndAccessToken = new Dictionary<string, AuthResponseDTO>() 
+        { 
+            { accessToken, response }
+        };
+
+        return userAndAccessToken;
     }
 
     private JwtSecurityToken CreateJwtToken

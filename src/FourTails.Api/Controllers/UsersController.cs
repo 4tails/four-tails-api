@@ -1,12 +1,11 @@
+using AutoMapper;
 using FourTails.Core.DomainModels;
-using FourTails.DataAccess;
+using FourTails.DTOs.Payload.Auth;
+using FourTails.DTOs.Payload.User;
+using FourTails.Services.Container;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using FourTails.DTOs.Payload.User;
-using FourTails.DTOs.Payload.Auth;
-using FourTails.Services.Container;
-using AutoMapper;
 
 namespace FourTails.Api.Controllers;
 
@@ -14,7 +13,6 @@ namespace FourTails.Api.Controllers;
 [Route("api/v1/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly FTDBContext _context;
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
@@ -22,14 +20,12 @@ public class UsersController : ControllerBase
     private readonly IUserService _userService;
 
     public UsersController(
-        FTDBContext context, 
         ILogger<UsersController> logger,
         IMapper mapper,
         IUserService userService,
         UserManager<User> userManager,
         TokenService tokenService)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -51,6 +47,39 @@ public class UsersController : ControllerBase
         _logger.LogInformation("executing GetAllUsers()");
 
         return Ok(users);
+    }
+
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [HttpGet("GetUserById/{id}")]
+    public async Task<ActionResult<User>> GetUserById(string id)
+    {
+        try 
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest("Invalid user id.");
+            }
+
+            var user = await _userService.ReadById(id);
+
+            if (user == null)
+            {
+                return NotFound("User does not exist.");
+            }
+
+            if (!user.IsActive)
+            {
+                return NotFound("User is inactive.");
+            }
+
+            return Ok(user);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+
+            return BadRequest(e.Message);
+        }
     }
 
     [Authorize(AuthenticationSchemes = "Bearer")]
@@ -156,21 +185,17 @@ public class UsersController : ControllerBase
             return BadRequest("Bad Credentials");
         }
 
-        var userInDb = _context.Users.FirstOrDefault(x => x.Email == request.Email);
+        var userAndAccessToken = _tokenService.CreateToken(request);
+        var userToken = userAndAccessToken?.Select(x => x.Key).First();
 
-        if (userInDb is null)
+        if (string.IsNullOrEmpty(userToken))
+        {
             return Unauthorized();
+        }
+        
+        var user = userAndAccessToken?.Select(x => x.Value).First();    
 
-        var accessToken = _tokenService.CreateToken(userInDb);
-
-        await _context.SaveChangesAsync();
-
-        return Ok(new AuthResponseDTO
-        (
-            UserName: userInDb.UserName,
-            Email: userInDb.Email,
-            Token: accessToken
-        ));
+        return Ok(user);
     }
 
     [Authorize(AuthenticationSchemes = "Bearer")]
