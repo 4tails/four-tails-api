@@ -12,6 +12,6 @@ public class UserProfile : Profile
             .ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.Age))
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
             .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
-            .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName));    }
+            .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName));
+    }
 }

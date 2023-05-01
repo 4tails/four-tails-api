@@ -8,6 +8,5 @@ public record class UserUpdateDetailsDTO
     int Age,
     string Address,
     string FirstName,
-    string LastName,
-    string UserName
+    string LastName
 );

@@ -38,7 +38,7 @@ public class UserService : IUserService
             user.Address = userUpdateDetailsDTO.Address;
             user.FirstName = userUpdateDetailsDTO.FirstName;
             user.LastName = userUpdateDetailsDTO.LastName;
-            user.UserName = userUpdateDetailsDTO.UserName;
+            user.UserName = $"{userUpdateDetailsDTO.FirstName}_{userUpdateDetailsDTO.LastName}".ToLower();
 
             _crudRepository.Update(user);
 

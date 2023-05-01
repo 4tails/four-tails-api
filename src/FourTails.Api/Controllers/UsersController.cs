@@ -1,4 +1,5 @@
 using AutoMapper;
+using FourTails.Api.Validations;
 using FourTails.Core.DomainModels;
 using FourTails.DTOs.Payload.Auth;
 using FourTails.DTOs.Payload.User;
@@ -37,16 +38,25 @@ public class UsersController : ControllerBase
     [HttpGet("GetAllUsers")]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
     {
-        if (!ModelState.IsValid) 
+        try
         {
-            BadRequest(ModelState);
+            if (!ModelState.IsValid) 
+            {
+                BadRequest(ModelState);
+            }
+
+            var users = await _userService.ReadAllUsers();
+
+            _logger.LogInformation("executing GetAllUsers()");
+
+            return Ok(users);
         }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
 
-        var users = await _userService.ReadAllUsers();
-
-        _logger.LogInformation("executing GetAllUsers()");
-
-        return Ok(users);
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
     }
 
     [Authorize(AuthenticationSchemes = "Bearer")]
@@ -78,24 +88,25 @@ public class UsersController : ControllerBase
         {
             _logger.LogError(e.Message);
 
-            return BadRequest(e.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 
     [Authorize(AuthenticationSchemes = "Bearer")]
     [HttpPut("UpdateUserDetails")]
-    public async Task<ActionResult> UpdateUserDetails([FromForm] UserUpdateDetailsDTO userUpdateDetailsDTO)
+    public async Task<ActionResult> UpdateUserDetails([FromForm] UserUpdateDetailsDTO request)
     {
         try 
         {
-            var id = userUpdateDetailsDTO.Id;
+            var userUpdateDetailsDTOValidation = new UserUpdateDetailsDTOValidation();
+            var validationResult = userUpdateDetailsDTOValidation.Validate(request);
 
-            if (string.IsNullOrWhiteSpace(id))
+            if (!validationResult.IsValid)
             {
-                return BadRequest("Invalid user id.");
+                return BadRequest(validationResult.Errors.First());
             }
 
-            var user = await _userService.ReadById(id);
+            var user = await _userService.ReadById(request.Id);
 
             if (!user.IsActive)
             {
@@ -107,7 +118,7 @@ public class UsersController : ControllerBase
                 return NotFound("User does not exist.");
             }
 
-            var updatedUser = _userService.Update(user, userUpdateDetailsDTO);
+            var updatedUser = _userService.Update(user, request);
 
             var userMap = _mapper.Map<User, UserUpdateDetailsDTO>(updatedUser);
 
@@ -117,85 +128,93 @@ public class UsersController : ControllerBase
         {
             _logger.LogError(e.Message);
 
-            return BadRequest(e.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 
     [HttpPost]
     [Route("Register")]
-    public async Task<ActionResult> Register(UserRegistrationDTO request)
+    public async Task<ActionResult> Register([FromForm] UserRegistrationDTO request)
     {
-        if (!ModelState.IsValid)
+        try 
         {
-            BadRequest(ModelState);
-        }
+            var userRegistrationDTOValidation = new UserRegistrationDTOValidation();
+            var validationResult = userRegistrationDTOValidation.Validate(request);
 
-        var response = await _userManager.CreateAsync
-        (
-            new User 
+            if (!validationResult.IsValid)
             {
-                Age = request.Age,
-                Address = request.Address,
-                CreatedBy = request.CreatedBy,
-                CreatedOn = DateTime.UtcNow,
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                UserName = request.Username
-            },
-            request.Password
-        );
+                return BadRequest(validationResult.Errors.First());
+            }
 
-        if (response.Succeeded)
-        {
+            var response = await _userManager.CreateAsync
+            (
+                new User 
+                {
+                    Age = request.Age,
+                    Address = request.Address,
+                    CreatedBy = request.Email,
+                    CreatedOn = DateTime.UtcNow,
+                    Email = request.Email,
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    UserName = $"{request.FirstName}_{request.LastName}".ToLower(),
+                    IsActive = true
+                },
+                request.Password
+            );
+
             return CreatedAtAction(nameof(Register), new {email = request.Email}, request);
         }
-         
-        response
-            .Errors
-            .Select(x => new {
-                Code = x.Code, Description = x.Description
-            })
-            .ToList()
-            .ForEach(x => ModelState.AddModelError(x.Code, x.Description));
-        
-        return BadRequest(ModelState);
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
     }
 
     [HttpPost]
     [Route("Login")]
-    public async Task<ActionResult<AuthResponseDTO>> Authenticate([FromBody] AuthRequestDTO request)
+    public async Task<ActionResult<AuthResponseDTO>> Authenticate([FromForm] AuthRequestDTO request)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
+        try {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userManager = await _userManager.FindByEmailAsync(request.Email);
+
+            if (userManager.Equals(null))
+            {
+                return BadRequest("Bad Credentials");
+            }
+
+            var isPasswordValid = await _userManager.CheckPasswordAsync(userManager, request.Password);
+
+            if (!isPasswordValid)
+            {
+                return BadRequest("Bad Credentials");
+            }
+
+            var userAndAccessToken = _tokenService.CreateToken(request);
+            var userToken = userAndAccessToken?.Select(x => x.Key).First();
+
+            if (string.IsNullOrEmpty(userToken))
+            {
+                return Unauthorized();
+            }
+            
+            var user = userAndAccessToken?.Select(x => x.Value).First();    
+
+            return Ok(user);
         }
-
-        var userManager = await _userManager.FindByEmailAsync(request.Email);
-
-        if (userManager.Equals(null))
+        catch(Exception e)
         {
-            return BadRequest("Bad Credentials");
+            _logger.LogError(e.Message);
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
-
-        var isPasswordValid = await _userManager.CheckPasswordAsync(userManager, request.Password);
-
-        if (!isPasswordValid)
-        {
-            return BadRequest("Bad Credentials");
-        }
-
-        var userAndAccessToken = _tokenService.CreateToken(request);
-        var userToken = userAndAccessToken?.Select(x => x.Key).First();
-
-        if (string.IsNullOrEmpty(userToken))
-        {
-            return Unauthorized();
-        }
-        
-        var user = userAndAccessToken?.Select(x => x.Value).First();    
-
-        return Ok(user);
     }
 
     [Authorize(AuthenticationSchemes = "Bearer")]
@@ -228,7 +247,8 @@ public class UsersController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e.Message);
-            return BadRequest(e.Message);
+
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 }
