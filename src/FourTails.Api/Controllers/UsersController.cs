@@ -163,7 +163,20 @@ public class UsersController : ControllerBase
                 request.Password
             );
 
-            return CreatedAtAction(nameof(Register), new {email = request.Email}, request);
+            if (response.Succeeded)
+            {
+                return CreatedAtAction(nameof(Register), new {email = request.Email}, request);
+            }
+
+            response
+            .Errors
+            .Select(x => new {
+                Code = x.Code, Description = x.Description
+            })
+            .ToList()
+            .ForEach(x => ModelState.AddModelError(x.Code, x.Description));
+
+            return BadRequest(ModelState);
         }
         catch (Exception e)
         {
